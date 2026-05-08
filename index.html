@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>World Cup 2026 Probability Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>World Cup 2026 Probability Tracker</h1>
+      <p class="sub">Monte Carlo scoreline simulation (Poisson). Enter played results, then run simulations to update probabilities.</p>
+    </div>
+    <div class="controls">
+      <label>Sims
+        <input id="sims" type="number" min="1000" step="1000" value="50000" />
+      </label>
+      <label>Total goals (90)
+        <input id="tg" type="number" min="1.5" max="4.5" step="0.1" value="2.6" />
+      </label>
+      <label>Scale K
+        <input id="k" type="number" min="1.0" max="10.0" step="0.25" value="6.0" />
+      </label>
+      <button id="run">Run simulations</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="row">
+        <h2>Results entry</h2>
+        <div class="right">
+          <select id="stageFilter">
+            <option value="all">All stages</option>
+            <option value="Group">Group</option>
+            <option value="R32">R32</option>
+            <option value="R16">R16</option>
+            <option value="QF">QF</option>
+            <option value="SF">SF</option>
+            <option value="Third">Third</option>
+            <option value="Final">Final</option>
+          </select>
+          <input id="search" placeholder="Search team…" />
+        </div>
+      </div>
+      <div class="hint">Edits save to your browser (localStorage). If you want them to persist publicly, edit <code>data/matches.json</code> in GitHub and commit.</div>
+      <div id="matches" class="tablewrap"></div>
+    </section>
+
+    <section class="card">
+      <h2>Outputs</h2>
+      <div class="hint">Probabilities shown alongside 1/p for each stage (e.g., p=0.5 → 2).</div>
+      <div id="outputs" class="tablewrap"></div>
+      <div id="status" class="status"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <small>For analysis/tracking.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
