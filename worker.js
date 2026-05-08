@@ -69,33 +69,46 @@ function applyGroupResult(stats, h2h, home, away, hg, ag){
 }
 
 function resolveTieBlock(block, stats, h2h, teamIndex){
+  // Correct ordering:
+  // 1) head-to-head mini-table within tied set (pts, GD, GF)
+  // 2) if still tied, overall GD then overall GF
+  // 3) final fallback: higher Index
+
   const mini = {};
-  for(const t of block) mini[t]={pts:0,gf:0,ga:0};
-  for(let a=0;a<block.length;a++){
-    for(let b=0;b<block.length;b++){
-      if(a===b) continue;
-      const tA=block[a], tB=block[b];
-      const rec=h2h.get(tA+'|'+tB);
-      if(rec){ mini[tA].pts+=rec.pts; mini[tA].gf+=rec.gf; mini[tA].ga+=rec.ga; }
+  for(const t of block) mini[t] = { pts: 0, gf: 0, ga: 0 };
+
+  // build mini-table from h2h map
+  for(let i=0;i<block.length;i++){
+    for(let j=0;j<block.length;j++){
+      if(i===j) continue;
+      const A = block[i], B = block[j];
+      const rec = h2h.get(A + '|' + B);
+      if(rec){
+        mini[A].pts += rec.pts;
+        mini[A].gf  += rec.gf;
+        mini[A].ga  += rec.ga;
+      }
     }
   }
 
-  let arr = block.slice();
-  arr.sort((x,y)=>{
-    const mx=mini[x], my=mini[y];
-    if(my.pts!==mx.pts) return my.pts-mx.pts;
-    const gdx=mx.gf-mx.ga, gdy=my.gf-my.ga;
-    if(gdy!==gdx) return gdy-gdx;
-    if(my.gf!==mx.gf) return my.gf-mx.gf;
-    return 0;
-  });
+  const arr = block.slice();
+  arr.sort((x,y) => {
+    const mx = mini[x], my = mini[y];
 
-  arr.sort((a,b)=>{
-    const sa=stats[a], sb=stats[b];
-    const gda=sa.gf-sa.ga, gdb=sb.gf-sb.ga;
-    if(gdb!==gda) return gdb-gda;
-    if(sb.gf!==sa.gf) return sb.gf-sa.gf;
-    return (teamIndex.get(b)||0) - (teamIndex.get(a)||0);
+    // head-to-head
+    if(my.pts !== mx.pts) return my.pts - mx.pts;
+    const gdx = mx.gf - mx.ga, gdy = my.gf - my.ga;
+    if(gdy !== gdx) return gdy - gdx;
+    if(my.gf !== mx.gf) return my.gf - mx.gf;
+
+    // overall (only if still tied)
+    const sx = stats[x], sy = stats[y];
+    const ogdx = sx.gf - sx.ga, ogdy = sy.gf - sy.ga;
+    if(ogdy !== ogdx) return ogdy - ogdx;
+    if(sy.gf !== sx.gf) return sy.gf - sx.gf;
+
+    // fallback to index
+    return (teamIndex.get(y) || 0) - (teamIndex.get(x) || 0);
   });
 
   return arr;
